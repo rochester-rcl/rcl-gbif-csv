@@ -2,6 +2,7 @@ import csv
 import sys
 csv.field_size_limit(sys.maxsize)
 
+
 class CSVReaderGenerator(object):
 
     def __init__(self, infile, **kwargs):

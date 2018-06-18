@@ -5,7 +5,7 @@ from urllib.error import HTTPError
 class GBIFSpeciesFetcher(object):
     filtered_fields = [
         'taxonID', 'species', 'genus', 'class', 'rank', 'parent', 'authorship', 'order', 'publishedIn', 'kingdom',
-        'family', 'scientificName', 'phylum', 'parentOfTaxon', 'name', 'canonicalName', 'source',
+        'family', 'scientificName', 'phylum', 'parentOfTaxon', 'name', 'canonicalName', 'source', 'synonym', 'speciesKey',
     ]
 
     def __init__(self, species_id, **kwargs):
@@ -29,6 +29,7 @@ class GBIFSpeciesFetcher(object):
         else:
             try:
                 result = species.name_usage(self.species_id, offset=offset, data='synonyms', limit=self.limit)
+                print(result)
                 self.parse_results(result)
                 if not result['endOfRecords']:
                     print(offset + self.limit)
