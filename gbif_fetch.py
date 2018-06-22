@@ -8,6 +8,8 @@ class GBIFSpeciesFetcher(object):
         'family', 'scientificName', 'phylum', 'parentOfTaxon', 'name', 'canonicalName', 'source', 'synonym', 'speciesKey',
     ]
 
+    required_fields = ['class', 'genus', 'species', 'order', 'kingdom', 'family', 'phylum']
+
     def __init__(self, species_id, **kwargs):
         self.species_id = species_id
         self.results = []
@@ -23,13 +25,16 @@ class GBIFSpeciesFetcher(object):
             if not root:
                 return None
             else:
-                self.results.append(self.parse_result(root))
-                self.root_fetched = True
-                return self.fetch(0)
+                parsed = self.parse_result(root)
+                if parsed is not None:
+                    self.results.append(self.parse_result(root))
+                    self.root_fetched = True
+                    return self.fetch(0)
+                else:
+                    return None
         else:
             try:
                 result = species.name_usage(self.species_id, offset=offset, data='synonyms', limit=self.limit)
-                print(result)
                 self.parse_results(result)
                 if not result['endOfRecords']:
                     print(offset + self.limit)
@@ -41,10 +46,19 @@ class GBIFSpeciesFetcher(object):
     def fetch_all(self):
         return self.fetch(0) if self.species_id else None
 
+    def is_valid_record(self, record):
+        try:
+            for key in self.required_fields:
+                if record[key] is None:
+                    return False
+            return True
+        except KeyError as error:
+            return False
+
     def parse_result(self, result):
         filtered = {}
         filtered['source'] = 'GBIF'
-        if result['rank'] in ['SPECIES', 'SUBSPECIES']:
+        if result['rank'] in ['SPECIES', 'SUBSPECIES'] and self.is_valid_record(result):
             try:
                 split_name = result['canonicalName'].split()
                 if result['rank'] == 'SUBSPECIES':
@@ -63,7 +77,8 @@ class GBIFSpeciesFetcher(object):
                 except KeyError as error:
                     pass
             return filtered
-        return None
+        else:
+            return None
 
     def parse_results(self, result):
         results = result['results']
@@ -72,7 +87,8 @@ class GBIFSpeciesFetcher(object):
             parsed = self.parse_result(_result)
             if parsed is not None:
                 filtered_results.append(parsed)
-        self.results = self.results + filtered_results
+        if len(filtered_results) > 0:
+            self.results.extend(filtered_results)
 
     # Super annoying - can't find a list of all available fields anywhere so I need to hardcode some in
     @staticmethod

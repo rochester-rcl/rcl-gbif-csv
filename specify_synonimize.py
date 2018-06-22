@@ -152,7 +152,7 @@ class SpecifySynonimize:
 
     def update_records(self, cursor, synonyms, accepted, records):
         accepted_query = 'UPDATE taxon SET IsAccepted = %(accepted_val)s WHERE TaxonID = %(accepted_id)s'
-        synonym_query = 'UPDATE taxon SET AcceptedID = %(accepted_id)s, IsAccepted = %(accepted_val)s WHERE TaxonID =' \
+        synonym_query = 'UPDATE taxon SET AcceptedID = %(accepted_id)s, IsAccepted = %(accepted_val)s, FullName = %(synonym_name)s WHERE TaxonID =' \
                         ' %(synonym_id)s'
 
         formatted_accepted = SpecifySynonimize.format_accepted(accepted, records)
@@ -180,6 +180,7 @@ class SpecifySynonimize:
                 data = {
                     'accepted_id': synonym['accepted_specify_id'],
                     'synonym_id': synonym['synonym_specify_id'],
+                    'synonym_name': synonym['synonym'],
                     'accepted_val': 0
                 }
                 cursor.execute(synonym_query, data)
