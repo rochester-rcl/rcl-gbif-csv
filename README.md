@@ -1,5 +1,7 @@
 ## Some Tools to get GBIF data into Specify 6
-This is an experimental and was created for a project at UR
+This is experimental and was created for a specific project at UR, and is thus a custom solution for a custom problem.
+You may, however, find some of this useful for your biodiversity
+projects. If so, make sure you back up your Specify database and use the synonymization tool at your own risk!
 
 #### Dependencies
 python 3
