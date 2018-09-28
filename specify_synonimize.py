@@ -50,7 +50,7 @@ class SpecifySynonimize:
     REPORT_FILENAME = 'specify_synonyms_report.csv'
     REPORT_ACCEPTED_FILENAME = 'specify_accepted_report.csv'
     REPORT_FIELDNAMES = ['synonym', 'synonym_guid', 'synonym_specify_id', 'accepted_name', 'accepted_guid',
-                         'accepted_specify_id']
+                         'accepted_specify_id', 'treedef', 'species_treedef']
     REPORT_ACCEPTED_FIELDNAMES = ['accepted_name', 'accepted_guid', 'accepted_specify_id']
 
     def __init__(self, db_config, input_csv):
@@ -92,7 +92,7 @@ class SpecifySynonimize:
         return results, accepted
 
     def synonymize_records(self, synonyms, accepted, **kwargs):
-        query = 'SELECT TaxonID AS species_id, CommonName AS species_name, GUID as species_guid FROM taxon'
+        query = 'SELECT TaxonID AS species_id, CommonName AS species_name, GUID AS species_guid, TaxonTreeDefID AS treedef FROM taxon'
         cursor = self.connection.cursor(dictionary=True)
         cursor.execute(query)
         results = cursor.fetchall()
@@ -117,7 +117,6 @@ class SpecifySynonimize:
                         'accepted_guid': species['taxonID']
                     }
                     formatted.append(info)
-                    break
         return formatted
 
     @staticmethod
@@ -126,15 +125,17 @@ class SpecifySynonimize:
         for synonym in synonyms:
             for record in records:
                 if synonym['synonym_guid'] == record['species_guid']:
-                    info = {
-                        'synonym_specify_id': record['species_id'],
-                    }
+                    accepted_ids = set([])
                     for _record in records:
                         if synonym['accepted_guid'] == _record['species_guid']:
+                            info = {
+                                'synonym_specify_id': record['species_id'],
+                                'species_treedef': record['treedef'],
+                            }
                             info['accepted_specify_id'] = _record['species_id']
-                            formatted.append({**synonym, **info})
-                            break
-                    break
+                            info['treedef'] = _record['treedef']
+                            if record['treedef'] == _record['treedef']:
+                                formatted.append({**synonym, **info})
         return formatted
 
     def do_report(self, synonyms, accepted, records):
@@ -188,6 +189,7 @@ class SpecifySynonimize:
             except mysql.connector.Error as error:
                 print(error)
                 sys.exit()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
