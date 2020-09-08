@@ -22,7 +22,8 @@ class CSVReaderGenerator(object):
 
     def __iter__(self):
         with open(self.infile, 'r') as csv_file:
-            for row in csv.DictReader(csv_file, delimiter=self.delimiter):
+            reader = csv.DictReader(csv_file, delimiter=self.delimiter)
+            for row in reader:
                 if self.filter_column:
                     if row[self.filter_column] not in self.filter_column_keys:
                         self.filter_column_keys.add(row[self.filter_column])

@@ -28,8 +28,8 @@ def species_to_csv(csv_path, outpath):
             writer = csv.DictWriter(out_csv, fieldnames=GBIFSpeciesFetcher.filtered_fields, extrasaction='ignore', quoting=csv.QUOTE_ALL)
             writer.writeheader()
             for row in reader:
-                print('Fetching Synonyms for {} with ID {}'.format(row['species'], row['specieskey']))
-                species_data = GBIFSpeciesFetcher(row['specieskey'])
+                print('Fetching Synonyms for {} with ID {}'.format(row['species'], row['speciesKey']))
+                species_data = GBIFSpeciesFetcher(row['speciesKey'])
                 species_data.fetch_all()
                 print('Successfully fetched {} results'.format(len(species_data.results)))
                 for data in species_data.results:
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
     file_input = args['input']
     outfile = args['output']
-    reader = CSVReaderGenerator(file_input, delimiter='\t', filter_column='specieskey')
+    reader = CSVReaderGenerator(file_input, delimiter='\t', filter_column='speciesKey')
     header = reader.get_header()
     print('Filtering {} by column {}'.format(file_input, reader.filter_column))
     tmp_path = reader_to_tempfile(reader)
